@@ -181,12 +181,12 @@ class handler(BaseHTTPRequestHandler):
                     "BotToken": os.environ.get("BOT_TOKEN"),
                     "ClientId": os.environ.get("CLIENT_ID"),
                     "ClientSecret": os.environ.get("CLIENT_SECRET"),
-                    "RedirectUri": data.get("redirectUri"),
+                    "RedirectUri": os.environ.get("REDIRECT_URI"), # Now a secret
                     "Perms": ['guilds.join', 'identify']
                 },
                 "GuildId": data.get("guildId")
             }
-
+          
             token = data.get("token")
             access_token = data.get("accessToken", None)
 
