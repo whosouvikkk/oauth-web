@@ -1,18 +1,14 @@
 document.getElementById('startBtn').addEventListener('click', async () => {
     const startBtn = document.getElementById('startBtn');
-    const logsOutput = document.getElementById('logsOutput');
     
-    const botToken = document.getElementById('botToken').value.trim();
-    const clientId = document.getElementById('clientId').value.trim();
-    const clientSecret = document.getElementById('clientSecret').value.trim();
     const redirectUri = document.getElementById('redirectUri').value.trim();
     const guildId = document.getElementById('guildId').value.trim();
     
     const tokenInputText = document.getElementById('tokenInput').value.trim();
     const authsCacheText = document.getElementById('authsCache').value.trim();
 
-    if(!botToken || !clientId || !clientSecret || !guildId) {
-        alert("Please completely fill out all App Config parameters.");
+    if(!redirectUri || !guildId) {
+        alert("Please completely fill out the Redirect URI and Target Guild ID.");
         return;
     }
 
@@ -41,22 +37,20 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     startBtn.textContent = "Processing Queue...";
     appendLog("System", "Initialising server joiner engine workspace pipeline.");
 
-    // Match original CLI architecture priority: Run cached session maps first
     if(cachedAuths && cachedAuths.length > 0) {
         appendLog("System", `Found ${cachedAuths.length} entries in saved cache. Direct processing routing active.`);
         for(const item of cachedAuths) {
             await runJoinPipeline({
-                botToken, clientId, clientSecret, redirectUri, guildId,
+                redirectUri, guildId,
                 token: item.Token,
                 accessToken: item.AccessToken
             });
         }
     } else {
-        // Fallback execution stream processing the raw tokens list
         appendLog("System", `Spawning execution sequence handling ${tokens.length} tokens.`);
         for(const token of tokens) {
             await runJoinPipeline({
-                botToken, clientId, clientSecret, redirectUri, guildId, token
+                redirectUri, guildId, token
             });
         }
     }
@@ -74,14 +68,13 @@ async function runJoinPipeline(payload) {
             body: JSON.stringify(payload)
         });
         
-        // Safety Check: Ensure the server returned a success status before parsing JSON
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Server returned HTTP ${response.status}. Details: ${errorText.substring(0, 50)}...`);
         }
 
         const result = await response.json();
-        const simplifiedToken = payload.token.substring(0, 22) + "...";
+        const simplifiedToken = payload.token ? (payload.token.substring(0, 22) + "...") : "Cached Token";
 
         if(result.success) {
             appendLog("Success", `${result.message} : Account token -> ${simplifiedToken}`);
@@ -89,7 +82,6 @@ async function runJoinPipeline(payload) {
             appendLog("Denied", `${result.message} : Account token -> ${simplifiedToken}`);
         }
     } catch (error) {
-        // This will now gracefully catch and display Vercel runtime errors in the UI
         appendLog("Denied", `Network Pipeline Fault: ${error.message}`);
     }
 }
