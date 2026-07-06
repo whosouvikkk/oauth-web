@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth2 Automation Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OAuth2 Server Joiner</h1>
+            <p>Convert authorization configurations into immediate automated server entries</p>
+        </header>
+
+        <main class="grid">
+            <section class="card config-section">
+                <h2>Application Config</h2>
+                <div class="form-group">
+                    <label for="botToken">Bot Token</label>
+                    <input type="password" id="botToken" placeholder="MTQ1MTE0NDUyMjQ..." value="MTQ1MTE0NDUyMjQwMTcxMDExMw.G47Itb.Wz5nXSF93jyBg5TZ3Ol7fE-O3F4-gAAId7rHDo">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientId">Client ID</label>
+                        <input type="text" id="clientId" placeholder="14511445..." value="1451144522401710113">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientSecret">Client Secret</label>
+                        <input type="password" id="clientSecret" placeholder="Irs0L4xM..." value="Irs0L4xMe3qpsJYpkxANexzewfc35k1y">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="redirectUri">Redirect URI</label>
+                    <input type="text" id="redirectUri" value="http://localhost:5000/callback">
+                </div>
+                <div class="form-group">
+                    <label for="guildId">Target Guild ID</label>
+                    <input type="text" id="guildId" placeholder="15106015348..." value="1510601534856101908">
+                </div>
+            </section>
+
+            <section class="card execution-section">
+                <h2>Input Tokens</h2>
+                <div class="form-group">
+                    <label for="tokenInput">Discord User Tokens (Line by line)</label>
+                    <textarea id="tokenInput" rows="6" placeholder="MTUxMTMzMzg3NzU5ODI1NzIzMw...&#10;MTUxMTYyNDkzNDcxODQ0MzYxMQ..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="authsCache">Cached Auths (Optional JSON Array)</label>
+                    <textarea id="authsCache" rows="3" placeholder='[{"Token": "...", "AccessToken": "..."}]'></textarea>
+                </div>
+                <button id="startBtn" class="btn btn-primary">Execute OAuth Pipeline</button>
+            </section>
+        </main>
+
+        <section class="card log-container">
+            <div class="log-header">
+                <h2>Activity Logs</h2>
+                <button id="clearLogs" class="btn btn-secondary">Clear</button>
+            </div>
+            <div id="logsOutput" class="terminal-view">
+                <span class="system-message">[System Status]: Waiting for parameters...</span>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
