@@ -74,6 +74,12 @@ async function runJoinPipeline(payload) {
             body: JSON.stringify(payload)
         });
         
+        // Safety Check: Ensure the server returned a success status before parsing JSON
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server returned HTTP ${response.status}. Details: ${errorText.substring(0, 50)}...`);
+        }
+
         const result = await response.json();
         const simplifiedToken = payload.token.substring(0, 22) + "...";
 
@@ -83,6 +89,7 @@ async function runJoinPipeline(payload) {
             appendLog("Denied", `${result.message} : Account token -> ${simplifiedToken}`);
         }
     } catch (error) {
+        // This will now gracefully catch and display Vercel runtime errors in the UI
         appendLog("Denied", `Network Pipeline Fault: ${error.message}`);
     }
 }
