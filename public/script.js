@@ -1,21 +1,17 @@
 document.getElementById('startBtn').addEventListener('click', async () => {
     const startBtn = document.getElementById('startBtn');
     
-    // 1. Safely grab the elements first
+    // Grab elements by their exact case-sensitive IDs
     const guildIdElement = document.getElementById('guildId');
     const tokenInputElement = document.getElementById('tokenInput');
 
-    // 2. Check if they exist in the HTML to prevent the "null" crash
-    if (!guildIdElement) {
-        alert("UI Error: Could not find the Target Guild ID input. Check your HTML for id='guildId'.");
-        return;
-    }
-    if (!tokenInputElement) {
-        alert("UI Error: Could not find the Tokens text area. Check your HTML for id='tokenInput'.");
+    // Safety Check
+    if (!guildIdElement || !tokenInputElement) {
+        alert("System Sync Error: Cannot locate input fields. Please ensure your index.html file has been fully updated on Vercel.");
         return;
     }
 
-    // 3. Now it is safe to read their values
+    // Extract values
     const guildId = guildIdElement.value.trim();
     const tokenInputText = tokenInputElement.value.trim();
 
