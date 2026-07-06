@@ -1,14 +1,26 @@
 document.getElementById('startBtn').addEventListener('click', async () => {
     const startBtn = document.getElementById('startBtn');
     
-    const redirectUri = document.getElementById('redirectUri').value.trim();
-    const guildId = document.getElementById('guildId').value.trim();
-    
-    const tokenInputText = document.getElementById('tokenInput').value.trim();
-    const authsCacheText = document.getElementById('authsCache').value.trim();
+    // 1. Safely grab the elements first
+    const guildIdElement = document.getElementById('guildId');
+    const tokenInputElement = document.getElementById('tokenInput');
 
-    if(!redirectUri || !guildId) {
-        alert("Please completely fill out the Redirect URI and Target Guild ID.");
+    // 2. Check if they exist in the HTML to prevent the "null" crash
+    if (!guildIdElement) {
+        alert("UI Error: Could not find the Target Guild ID input. Check your HTML for id='guildId'.");
+        return;
+    }
+    if (!tokenInputElement) {
+        alert("UI Error: Could not find the Tokens text area. Check your HTML for id='tokenInput'.");
+        return;
+    }
+
+    // 3. Now it is safe to read their values
+    const guildId = guildIdElement.value.trim();
+    const tokenInputText = tokenInputElement.value.trim();
+
+    if(!guildId) {
+        alert("Configuration Error: Target Guild ID is required.");
         return;
     }
 
@@ -17,47 +29,25 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         tokens = tokenInputText.split('\n').map(t => t.trim()).filter(t => t.length > 0);
     }
 
-    let cachedAuths = [];
-    if(authsCacheText) {
-        try {
-            cachedAuths = JSON.parse(authsCacheText);
-        } catch(e) {
-            alert("Cached Auths field must be a valid JSON Array framework layout.");
-            return;
-        }
-    }
-
-    if(tokens.length === 0 && cachedAuths.length === 0) {
-        alert("Please provide at least one source token or a valid authorization cache configuration.");
+    if(tokens.length === 0) {
+        alert("Configuration Error: Please input one or more tokens.");
         return;
     }
 
-    // Freeze interface during runtime executions
+    // Freeze layout elements for execution continuity
     startBtn.disabled = true;
-    startBtn.textContent = "Processing Queue...";
-    appendLog("System", "Initialising server joiner engine workspace pipeline.");
+    startBtn.querySelector('span').textContent = "Executing Pipeline Tasks...";
+    
+    appendLog("sys", `Pipeline sequence open. Dispatching queue of ${tokens.length} elements.`);
 
-    if(cachedAuths && cachedAuths.length > 0) {
-        appendLog("System", `Found ${cachedAuths.length} entries in saved cache. Direct processing routing active.`);
-        for(const item of cachedAuths) {
-            await runJoinPipeline({
-                redirectUri, guildId,
-                token: item.Token,
-                accessToken: item.AccessToken
-            });
-        }
-    } else {
-        appendLog("System", `Spawning execution sequence handling ${tokens.length} tokens.`);
-        for(const token of tokens) {
-            await runJoinPipeline({
-                redirectUri, guildId, token
-            });
-        }
+    for(const token of tokens) {
+        await runJoinPipeline({ guildId, token });
     }
 
+    // Restore interactives
     startBtn.disabled = false;
-    startBtn.textContent = "Execute OAuth Pipeline";
-    appendLog("System", "All connection tasks finalized.");
+    startBtn.querySelector('span').textContent = "Launch Application Pipeline";
+    appendLog("sys", "All queued worker operations concluded.");
 });
 
 async function runJoinPipeline(payload) {
@@ -70,43 +60,42 @@ async function runJoinPipeline(payload) {
         
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Server returned HTTP ${response.status}. Details: ${errorText.substring(0, 50)}...`);
+            throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 35)}`);
         }
 
         const result = await response.json();
-        const simplifiedToken = payload.token ? (payload.token.substring(0, 22) + "...") : "Cached Token";
+        const simplifiedToken = payload.token.substring(0, 20) + "...";
 
         if(result.success) {
-            appendLog("Success", `${result.message} : Account token -> ${simplifiedToken}`);
+            appendLog("ok", `Status Code [SUCCESS] → ${result.message} (${simplifiedToken})`);
         } else {
-            appendLog("Denied", `${result.message} : Account token -> ${simplifiedToken}`);
+            appendLog("err", `Status Code [FAILED] → ${result.message} (${simplifiedToken})`);
         }
     } catch (error) {
-        appendLog("Denied", `Network Pipeline Fault: ${error.message}`);
+        appendLog("err", `Network Pipeline Intercept: ${error.message}`);
     }
 }
 
-function appendLog(status, message) {
-    const logsOutput = document.getElementById('logsOutput');
-    const time = new Date().toLocaleTimeString();
-    
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
+function appendLog(type, message) {
+    const screen = document.getElementById('logsOutput');
+    const row = document.createElement('div');
+    row.className = 'log-line';
 
-    let statusClass = 'system-message';
-    if(status === "Success") statusClass = 'log-status-success';
-    if(status === "Denied") statusClass = 'log-status-denied';
-
-    entry.innerHTML = `
-        <span class="log-time">[${time}]</span>
-        <span class="${statusClass}">[${status}]</span>
-        <span class="log-desc">${message}</span>
-    `;
+    if(type === "ok") {
+        row.className += ' success-log';
+        row.textContent = `[+] ${message}`;
+    } else if(type === "err") {
+        row.className += ' error-log';
+        row.textContent = `[-] ${message}`;
+    } else {
+        row.className += ' sys-log';
+        row.textContent = `[*] ${message}`;
+    }
     
-    logsOutput.appendChild(entry);
-    logsOutput.scrollTop = logsOutput.scrollHeight;
+    screen.appendChild(row);
+    screen.scrollTop = screen.scrollHeight;
 }
 
 document.getElementById('clearLogs').addEventListener('click', () => {
-    document.getElementById('logsOutput').innerHTML = '<span class="system-message">[System Status]: Log terminal cleared.</span>';
+    document.getElementById('logsOutput').innerHTML = '<div class="log-line sys-log">Terminal buffer wiped clean.</div>';
 });
