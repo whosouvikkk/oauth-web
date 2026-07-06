@@ -3,55 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth2 Automation Dashboard</title>
+    <title>OAuth2 Joiner | Professional Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>OAuth2 Server Joiner</h1>
-            <p>Convert authorization configurations into immediate automated server entries</p>
+    <div class="app-container">
+        <header class="top-nav">
+            <div class="nav-brand">
+                <svg class="brand-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>
+                <h1>OAuth2 Workspace</h1>
+            </div>
+            <div class="status-badge"><span class="dot"></span> System Online</div>
         </header>
 
-        <main class="grid">
-            <section class="card config-section">
-                <h2>Application Config</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                    🔒 Credentials (Bot Token, Client ID, Client Secret) are securely loaded from Vercel Environment Variables.
-                </p>
-                <div class="form-group">
-                    <label for="redirectUri">Redirect URI</label>
-                    <input type="text" id="redirectUri" value="http://localhost:5000/callback">
+        <main class="dashboard-grid">
+            <aside class="info-panel">
+                <div class="card">
+                    <h2>⚠️ Operational Rules</h2>
+                    <ul class="rules-list">
+                        <li>
+                            <strong>Bot Presence Required:</strong> The automation bot MUST be present in the target server before running tokens. 
+                            <a href="#" class="bot-link" target="_blank">Invite Bot Here &rarr;</a>
+                        </li>
+                        <li>
+                            <strong>Proper Permissions:</strong> Ensure the bot has the `CREATE_INSTANT_INVITE` and `MANAGE_SERVER` permissions in the target guild to authorize users.
+                        </li>
+                        <li>
+                            <strong>Rate Limits Apply:</strong> Discord enforces strict API limits. The system will auto-pause if rate limits are hit, but do not aggressively spam tasks.
+                        </li>
+                        <li>
+                            <strong>Token Validity:</strong> Invalid, locked, or flagged tokens will automatically fail the pipeline and be marked as denied.
+                        </li>
+                    </ul>
                 </div>
-                <div class="form-group">
-                    <label for="guildId">Target Guild ID</label>
-                    <input type="text" id="guildId" placeholder="15106015348..." value="1510601534856101908">
-                </div>
-            </section>
+            </aside>
 
-            <section class="card execution-section">
-                <h2>Input Tokens</h2>
-                <div class="form-group">
-                    <label for="tokenInput">Discord User Tokens (Line by line)</label>
-                    <textarea id="tokenInput" rows="5" placeholder="MTUxMTMzMzg3NzU5ODI1NzIzMw...&#10;MTUxMTYyNDkzNDcxODQ0MzYxMQ..."></textarea>
+            <section class="execution-panel">
+                <div class="card">
+                    <h2>Target Configuration</h2>
+                    <div class="form-group">
+                        <label for="guildId">Target Guild ID</label>
+                        <input type="text" id="guildId" placeholder="e.g. 1510601534856101908" autocomplete="off">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tokenInput">User Tokens</label>
+                        <textarea id="tokenInput" rows="6" placeholder="Paste tokens here, one per line..."></textarea>
+                    </div>
+
+                    <button id="startBtn" class="btn btn-primary">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Execute Join Pipeline
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="authsCache">Cached Auths (Optional JSON Array)</label>
-                    <textarea id="authsCache" rows="2" placeholder='[{"Token": "...", "AccessToken": "..."}]'></textarea>
+
+                <div class="card log-card">
+                    <div class="log-header">
+                        <h2>Activity Terminal</h2>
+                        <button id="clearLogs" class="btn btn-sm">Clear Logs</button>
+                    </div>
+                    <div id="logsOutput" class="terminal">
+                        <div class="log-entry system-msg">[System]: Awaiting pipeline execution...</div>
+                    </div>
                 </div>
-                <button id="startBtn" class="btn btn-primary">Execute OAuth Pipeline</button>
             </section>
         </main>
-
-        <section class="card log-container">
-            <div class="log-header">
-                <h2>Activity Logs</h2>
-                <button id="clearLogs" class="btn btn-secondary">Clear</button>
-            </div>
-            <div id="logsOutput" class="terminal-view">
-                <span class="system-message">[System Status]: Waiting for parameters...</span>
-            </div>
-        </section>
     </div>
     <script src="script.js"></script>
 </body>
