@@ -92,7 +92,7 @@ class AuthUtils:
         encoded_redirect = parse.quote_plus(self.ClientRedirectUri)
         encoded_perms = "%20".join(config['BotConfig']['Perms'])
         
-        self.FetchLocUri = f"{api_end}oauth2/authorize?client_id={self.ClientId}&response_type={code}&redirect_uri={encoded_redirect}&scope={encoded_perms}"
+        self.FetchLocUri = f"{api_end}oauth2/authorize?client_id={self.ClientId}&response_type=code&redirect_uri={encoded_redirect}&scope={encoded_perms}"
         self.FetchAuthUri = f"{api_end}oauth2/token"
         self.JoinUri = "https://discord.com/api/guilds/{}/members/{}"
 
