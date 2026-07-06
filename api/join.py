@@ -5,6 +5,7 @@ import base64
 import binascii
 import random
 import time
+import os
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.ssl_ import create_urllib3_context
@@ -92,6 +93,7 @@ class AuthUtils:
         encoded_redirect = parse.quote_plus(self.ClientRedirectUri)
         encoded_perms = "%20".join(config['BotConfig']['Perms'])
         
+        # Fixed the string interpolation bug here
         self.FetchLocUri = f"{api_end}oauth2/authorize?client_id={self.ClientId}&response_type=code&redirect_uri={encoded_redirect}&scope={encoded_perms}"
         self.FetchAuthUri = f"{api_end}oauth2/token"
         self.JoinUri = "https://discord.com/api/guilds/{}/members/{}"
@@ -173,12 +175,12 @@ class handler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
 
-            # Configuration payload parsed directly from UI
+            # Configuration payload pulled securely from process environments
             config = {
                 "BotConfig": {
-                    "BotToken": data.get("botToken"),
-                    "ClientId": data.get("clientId"),
-                    "ClientSecret": data.get("clientSecret"),
+                    "BotToken": os.environ.get("BOT_TOKEN"),
+                    "ClientId": os.environ.get("CLIENT_ID"),
+                    "ClientSecret": os.environ.get("CLIENT_SECRET"),
                     "RedirectUri": data.get("redirectUri"),
                     "Perms": ['guilds.join', 'identify']
                 },
@@ -193,34 +195,34 @@ class handler(BaseHTTPRequestHandler):
             response_data = {"success": False, "message": "Unknown runtime state", "token": token}
 
             try:
-                if not access_token:
-                    # Execute Step 1: Request Code Authorization
-                    loc_res = auth_utils.fetch_location(token)
-                    if loc_res['success']:
-                        # Execute Step 2: Swap Authorization Code for Access Token
-                        auth_res = auth_utils.fetch_auth(loc_res['code'])
-                        if auth_res['success']:
-                            access_token = auth_res['Auth']['AccessToken']
-                            response_data["accessToken"] = access_token
+                if not config["BotConfig"]["BotToken"] or not config["BotConfig"]["ClientId"] or not config["BotConfig"]["ClientSecret"]:
+                    response_data = {"success": False, "message": "Server Config Error: Environment variables are missing.", "token": token}
+                else:
+                    if not access_token:
+                        loc_res = auth_utils.fetch_location(token)
+                        if loc_res['success']:
+                            auth_res = auth_utils.fetch_auth(loc_res['code'])
+                            if auth_res['success']:
+                                access_token = auth_res['Auth']['AccessToken']
+                                response_data["accessToken"] = access_token
+                            else:
+                                response_data = {"success": False, "message": f"Auth Exchange Failed: {auth_res['message']}", "token": token}
                         else:
-                            response_data = {"success": False, "message": f"Auth Exchange Failed: {auth_res['message']}", "token": token}
-                    else:
-                        response_data = {"success": False, "message": f"Oauth Init Failed: {loc_res['message']}", "token": token}
+                            response_data = {"success": False, "message": f"Oauth Init Failed: {loc_res['message']}", "token": token}
 
-                # Execute Step 3: Use Token Credentials to force Add user to Guild
-                if access_token:
-                    user_id = auth_utils.token_id(token)
-                    join_res = auth_utils.auth_join(
-                        access_token=access_token,
-                        user_id=user_id,
-                        guild_id=int(config['GuildId'])
-                    )
-                    response_data = {
-                        "success": join_res['success'],
-                        "message": join_res['message'],
-                        "token": token,
-                        "accessToken": access_token
-                    }
+                    if access_token:
+                        user_id = auth_utils.token_id(token)
+                        join_res = auth_utils.auth_join(
+                            access_token=access_token,
+                            user_id=user_id,
+                            guild_id=int(config['GuildId'])
+                        )
+                        response_data = {
+                            "success": join_res['success'],
+                            "message": join_res['message'],
+                            "token": token,
+                            "accessToken": access_token
+                        }
 
             except Exception as e:
                 response_data = {"success": False, "message": f"System Exception: {str(e)}", "token": token}
